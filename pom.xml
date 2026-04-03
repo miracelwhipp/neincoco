@@ -33,13 +33,12 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>central</id>
-<!--            <url>https://central.sonatype.com/repository/snapshots/</url>-->
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/miracelwhipp/neincoco</url>
         </snapshotRepository>
         <repository>
             <id>central</id>
-            <url>https://central.sonatype.com/service/local/staging/deploy/maven2/</url>
+            <url>https://central.sonatype.com/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
 
@@ -173,18 +172,16 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--            <plugin>-->
-            <!--                <groupId>org.sonatype.plugins</groupId>-->
-            <!--                <artifactId>nexus-staging-maven-plugin</artifactId>-->
-            <!--                <version>1.6.13</version>-->
-            <!--                <extensions>true</extensions>-->
-            <!--                <configuration>-->
-            <!--                    <serverId>ossrh</serverId>-->
-            <!--                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>-->
-            <!--                    <autoReleaseAfterClose>false</autoReleaseAfterClose>-->
-            <!--                    <skipNexusStagingDeployStrategy>true</skipNexusStagingDeployStrategy>-->
-            <!--                </configuration>-->
-            <!--            </plugin>-->
+            <plugin>
+                <groupId>net.nicoulaj.maven.plugins</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.4.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
