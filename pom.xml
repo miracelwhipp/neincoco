@@ -173,7 +173,7 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>net.nicoulaj.maven.plugins</groupId>
+                <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
                 <version>0.4.0</version>
                 <extensions>true</extensions>
