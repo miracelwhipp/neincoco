@@ -23,7 +23,7 @@ jobs:
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
       - name: maven release
-        run: export GPG_TTY=$(tty) && mvn --global-settings deployment/global-settings.xml --batch-mode release:prepare release:perform -e
+        run: export GPG_TTY=$(tty) && mvn --global-settings deployment/global-settings.xml --batch-mode release:prepare release:perform -e -Prelease
         env:
           GPG_KEY_NAME: ${{ secrets.SIGNATURE_KEY_NAME }}
           GPG_PASS_PHRASE: ${{ secrets.SIGNATURE_PASSWORD }}
