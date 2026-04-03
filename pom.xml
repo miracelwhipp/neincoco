@@ -18,6 +18,16 @@
         <central.deployment.name>${project.groupId}:${project.artifactId}:${project.version}</central.deployment.name>
     </properties>
 
+    <name>
+        NeinCoco Maven plugin
+    </name>
+
+    <description>
+        a maven plugin for aggregating jacoco results conveniently
+    </description>
+
+    <url>https://github.com/miracelwhipp/neincoco</url>
+
     <licenses>
         <license>
             <name>MIT License</name>
