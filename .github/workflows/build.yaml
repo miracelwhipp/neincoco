@@ -2,7 +2,7 @@ name: build commits
 
 on:
   push:
-    branches-ignore: [ master ]
+    branches-ignore: [ main ]
   pull_request: {}
 
 
