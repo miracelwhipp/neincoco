@@ -143,6 +143,7 @@
                 <configuration>
                     <tagNameFormat>@{project.version}</tagNameFormat>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <releaseProfiles>release</releaseProfiles>
                 </configuration>
             </plugin>
             <plugin>
