@@ -20,7 +20,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
           server-id: github
-          server-username: miracelwhipp
+          server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
           gpg-private-key: ${{ secrets.PGP_KEY }}
           gpg-passphrase: ${{ secrets.SIGNATURE_PASSWORD }}
@@ -29,3 +29,5 @@ jobs:
         env:
           GPG_KEY_NAME: miracelwhipp
           GPG_PASS_PHRASE: ${{ secrets.SIGNATURE_PASSWORD }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
