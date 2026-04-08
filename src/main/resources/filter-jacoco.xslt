@@ -13,4 +13,6 @@
 
     <xsl:template match="package[not(class/counter)]" />
 
+    <xsl:template match="sourcefile[not(counter)]" />
+
 </xsl:stylesheet>
