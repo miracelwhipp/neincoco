@@ -26,12 +26,12 @@
      we do not check for '$' since it is (formally) possible to define a class with a '$' in its name - in this case a
      '$' will be part of the file name.
       -->
-    <xsl:template match="class[not(contains(@sourcefilename, @name)) and $ignoreNestedClassesOfIgnoredNonNestedClasses]">
+    <xsl:template match="class[not(contains(concat(@name, '.java'), @sourcefilename)) and $ignoreNestedClassesOfIgnoredNonNestedClasses]">
         <xsl:variable name="sourceFileName" select="@sourcefilename"/>
         <!-- this check finds a class element in the same package, that is a 'root class' and is located in the same file
         as the class inspected.
         If this class exists and has a 'counter' element as child, we copy the class inspected -->
-        <xsl:if test="../class[@sourcefilename = $sourceFileName and contains(@sourcefilename, @name) and counter]">
+        <xsl:if test="../class[@sourcefilename = $sourceFileName and contains(concat(@name, '.java'), @sourcefilename) and counter]">
             <xsl:copy>
                 <xsl:apply-templates select="@*|node()"/>
             </xsl:copy>
@@ -42,7 +42,7 @@
     class is not ignored -->
     <xsl:template match="sourcefile[counter and $ignoreNestedClassesOfIgnoredNonNestedClasses]">
         <xsl:variable name="sourceFileName" select="@name"/>
-        <xsl:if test="../class[@sourcefilename = $sourceFileName and contains(@sourcefilename, @name) and counter]">
+        <xsl:if test="../class[@sourcefilename = $sourceFileName and contains(concat(@name, '.java'), @sourcefilename) and counter]">
             <xsl:copy>
                 <xsl:apply-templates select="@*|node()"/>
             </xsl:copy>
