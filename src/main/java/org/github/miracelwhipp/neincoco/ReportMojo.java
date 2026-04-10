@@ -1,7 +1,6 @@
 package org.github.miracelwhipp.neincoco;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -17,15 +16,29 @@ import org.jacoco.report.xml.XMLFormatter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
 @Mojo(name = "report", defaultPhase = LifecyclePhase.VERIFY, threadSafe = true)
 public class ReportMojo extends NeinCocoMojo {
 
+    /**
+     * This parameter specifies the name of the report.
+     */
     @Parameter(defaultValue = "Coverage ${project.groupId}:${project.artifactId}:${project.version}")
     private String reportName;
 
+    /**
+     * This parameter specifies a text file to where the {@code report} goal writes all source directories. This is not
+     * necessary, but can be a help for further tools.
+     * This behavior can be turned off by setting this parameter to the empty string.
+     */
+    @Parameter(defaultValue = "${project.build.directory}/jacoco-source-directories.txt")
+    private String sourceDirectoryResultFile;
+
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void execute() throws MojoExecutionException {
 
         if (skip) {
 
@@ -84,6 +97,8 @@ public class ReportMojo extends NeinCocoMojo {
 
         IBundleCoverage bundleCoverage = coverageBuilder.getBundle(reportName);
 
+        StringBuilder directories = new StringBuilder();
+
         try (FileOutputStream out = new FileOutputStream(outputFile)) {
 
             IReportVisitor visitor = new XMLFormatter().createVisitor(out);
@@ -92,14 +107,32 @@ public class ReportMojo extends NeinCocoMojo {
 
             MultiSourceFileLocator sourceLocator = new MultiSourceFileLocator(4);
 
+            Path reactorRootDirectory = session.getRequest().getMultiModuleProjectDirectory().toPath();
+
             for (MavenProject module : session.getProjects()) {
 
-                DirectorySourceFileLocator.of(module).forEach(sourceLocator::add);
+                List<DirectorySourceFileLocator> directorySourceFileLocators = DirectorySourceFileLocator.of(module);
+                directorySourceFileLocators.forEach(sourceLocator::add);
+                directorySourceFileLocators.forEach(locator -> {
+
+                    File sourceRoot = locator.getSourceRoot();
+                    if (sourceRoot.isDirectory()) {
+
+                        Path relativePath = reactorRootDirectory.relativize(sourceRoot.toPath());
+
+                        directories.append(relativePath).append("\n");
+                    }
+                });
             }
 
             visitor.visitBundle(bundleCoverage, sourceLocator);
 
             visitor.visitEnd();
+
+            if (sourceDirectoryResultFile != null && !sourceDirectoryResultFile.trim().isEmpty()) {
+
+                Files.write(new File(sourceDirectoryResultFile).toPath(), directories.toString().getBytes());
+            }
 
         } catch (IOException e) {
 

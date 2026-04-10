@@ -20,6 +20,8 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 @Mojo(name = "post-process", aggregator = true, defaultPhase = LifecyclePhase.VERIFY)
 public class PostprocessMojo extends NeinCocoMojo {
@@ -32,6 +34,22 @@ public class PostprocessMojo extends NeinCocoMojo {
 
     @Parameter(defaultValue = "classpath:filter-jacoco.xslt", property = "neincoco.transformation")
     private String transformation;
+
+    /**
+     * If this parameter is set to true post-processing will assure that nested classes whose most upper containing
+     * class (i.e. the class that matches the source file name) that is somehow ignored by jacoco
+     * (by annotation or exclusion) will be ignored also. This is a convenience since mostly one wants to mark files
+     * not classes as ignored.
+     */
+    @Parameter(defaultValue = "true", property = "neincoco.ignore-nested")
+    private boolean ignoreNestedClassesOfIgnoredNonNestedClasses;
+
+    /**
+     * This parameter sets additional parameters to the post-processing - this is only have effect, if a custom
+     * post-processing stylesheet is used and the custom stylesheet accepts those parameters.
+     */
+    @Parameter
+    private Map<String, String> additionalParameters = new HashMap<>();
 
     @Component
     private MavenProjectHelper projectHelper;
@@ -61,8 +79,12 @@ public class PostprocessMojo extends NeinCocoMojo {
 
             Transformer transformer = newTransformer(styleSource);
 
+            additionalParameters.forEach(transformer::setParameter);
+            transformer.setParameter("ignoreNestedClassesOfIgnoredNonNestedClasses",  ignoreNestedClassesOfIgnoredNonNestedClasses);
+
             Source xmlSource = makeSource();
             StreamResult xmlResult = new StreamResult(xmlReportFile);
+
 
             transformer.transform(xmlSource, xmlResult);
 

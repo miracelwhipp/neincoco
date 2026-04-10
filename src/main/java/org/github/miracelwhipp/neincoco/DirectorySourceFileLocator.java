@@ -36,6 +36,10 @@ public class DirectorySourceFileLocator implements ISourceFileLocator {
                 .toList();
     }
 
+    public File getSourceRoot() {
+        return sourceRoot;
+    }
+
     @Override
     public Reader getSourceFile(String packageName, String fileName) throws IOException {
 
