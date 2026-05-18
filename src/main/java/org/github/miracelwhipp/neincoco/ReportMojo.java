@@ -1,5 +1,6 @@
 package org.github.miracelwhipp.neincoco;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -99,41 +100,47 @@ public class ReportMojo extends NeinCocoMojo {
 
         StringBuilder directories = new StringBuilder();
 
-        try (FileOutputStream out = new FileOutputStream(outputFile)) {
+        try {
 
-            IReportVisitor visitor = new XMLFormatter().createVisitor(out);
+            FileUtils.forceMkdir(outputFile.getParentFile());
 
-            visitor.visitInfo(loader.getSessionInfoStore().getInfos(), loader.getExecutionDataStore().getContents());
+            try (FileOutputStream out = new FileOutputStream(outputFile)) {
 
-            MultiSourceFileLocator sourceLocator = new MultiSourceFileLocator(4);
+                IReportVisitor visitor = new XMLFormatter().createVisitor(out);
 
-            Path reactorRootDirectory = session.getRequest().getMultiModuleProjectDirectory().toPath();
+                visitor.visitInfo(loader.getSessionInfoStore().getInfos(), loader.getExecutionDataStore().getContents());
 
-            for (MavenProject module : session.getProjects()) {
+                MultiSourceFileLocator sourceLocator = new MultiSourceFileLocator(4);
 
-                List<DirectorySourceFileLocator> directorySourceFileLocators = DirectorySourceFileLocator.of(module);
-                directorySourceFileLocators.forEach(sourceLocator::add);
-                directorySourceFileLocators.forEach(locator -> {
+                Path reactorRootDirectory = session.getRequest().getMultiModuleProjectDirectory().toPath();
 
-                    File sourceRoot = locator.getSourceRoot();
-                    if (sourceRoot.isDirectory()) {
+                for (MavenProject module : session.getProjects()) {
 
-                        Path relativePath = reactorRootDirectory.relativize(sourceRoot.toPath());
+                    List<DirectorySourceFileLocator> directorySourceFileLocators = DirectorySourceFileLocator.of(module);
+                    directorySourceFileLocators.forEach(sourceLocator::add);
+                    directorySourceFileLocators.forEach(locator -> {
 
-                        directories.append(relativePath).append("\n");
-                    }
-                });
+                        File sourceRoot = locator.getSourceRoot();
+                        if (sourceRoot.isDirectory()) {
+
+                            Path relativePath = reactorRootDirectory.relativize(sourceRoot.toPath());
+
+                            directories.append(relativePath).append("\n");
+                        }
+                    });
+                }
+
+                visitor.visitBundle(bundleCoverage, sourceLocator);
+
+                visitor.visitEnd();
+
+                if (sourceDirectoryResultFile != null && !sourceDirectoryResultFile.trim().isEmpty()) {
+
+                    FileUtils.forceMkdir(new File(sourceDirectoryResultFile).getParentFile());
+
+                    Files.write(new File(sourceDirectoryResultFile).toPath(), directories.toString().getBytes());
+                }
             }
-
-            visitor.visitBundle(bundleCoverage, sourceLocator);
-
-            visitor.visitEnd();
-
-            if (sourceDirectoryResultFile != null && !sourceDirectoryResultFile.trim().isEmpty()) {
-
-                Files.write(new File(sourceDirectoryResultFile).toPath(), directories.toString().getBytes());
-            }
-
         } catch (IOException e) {
 
             throw new MojoExecutionException(e);
