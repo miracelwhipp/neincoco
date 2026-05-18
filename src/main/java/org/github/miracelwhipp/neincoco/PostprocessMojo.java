@@ -1,6 +1,7 @@
 package org.github.miracelwhipp.neincoco;
 
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -80,18 +81,20 @@ public class PostprocessMojo extends NeinCocoMojo {
             Transformer transformer = newTransformer(styleSource);
 
             additionalParameters.forEach(transformer::setParameter);
-            transformer.setParameter("ignoreNestedClassesOfIgnoredNonNestedClasses",  ignoreNestedClassesOfIgnoredNonNestedClasses);
+            transformer.setParameter("ignoreNestedClassesOfIgnoredNonNestedClasses", ignoreNestedClassesOfIgnoredNonNestedClasses);
 
             Source xmlSource = makeSource();
-            StreamResult xmlResult = new StreamResult(xmlReportFile);
 
+            FileUtils.forceMkdir(xmlReportFile);
+
+            StreamResult xmlResult = new StreamResult(xmlReportFile);
 
             transformer.transform(xmlSource, xmlResult);
 
             projectHelper.attachArtifact(session.getCurrentProject(), "xml", "coverage-final", xmlReportFile);
 
 
-        } catch (TransformerException e) {
+        } catch (TransformerException | IOException e) {
 
             throw new MojoExecutionException(e);
         }
