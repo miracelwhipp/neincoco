@@ -85,7 +85,7 @@ public class PostprocessMojo extends NeinCocoMojo {
 
             Source xmlSource = makeSource();
 
-            FileUtils.forceMkdir(xmlReportFile);
+            FileUtils.forceMkdir(xmlReportFile.getParentFile());
 
             StreamResult xmlResult = new StreamResult(xmlReportFile);
 
